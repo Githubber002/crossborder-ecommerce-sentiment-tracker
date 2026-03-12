@@ -150,6 +150,7 @@ const Index = () => {
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Release Notes</h4>
           <ul className="space-y-1 text-xs text-muted-foreground">
             <li><span className="font-medium text-foreground">v1.4</span> — Added Rakuten & Shopee coverage for broader global sentiment</li>
+            <li><span className="font-medium text-foreground">v1.3</span> — Added Shopify Blog as sentiment source for deeper e-commerce coverage</li>
             <li><span className="font-medium text-foreground">v1.2</span> — Added Google News & YouTube as free sources for broader coverage</li>
             <li><span className="font-medium text-foreground">v1.1</span> — Added AI analysis via Perplexity, sentiment gauge & breakdown panel</li>
             <li><span className="font-medium text-foreground">v1.0</span> — Initial launch with NewsData.io sentiment tracking</li>
