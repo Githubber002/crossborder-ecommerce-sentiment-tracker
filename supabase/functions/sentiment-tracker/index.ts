@@ -13,8 +13,8 @@ const corsHeaders = {
 
 const QUERY = '"cross-border e-commerce" OR Temu OR Shein OR "global commerce" OR "EU tariffs" OR Rakuten OR Shopee';
 
-const POS_WORDS = ["growth", "surge", "boom", "success", "record", "expand", "profit", "gain", "opportunity", "thrive", "innovation", "partnership"];
-const NEG_WORDS = ["tariff", "ban", "crash", "decline", "loss", "tension", "risk", "war", "sanction", "crackdown", "fine", "penalty", "slowdown"];
+const POS_WORDS = ["growth", "surge", "boom", "success", "record", "expand", "profit", "gain", "opportunity", "thrive", "innovation", "partnership", "expansion", "launch", "adoption", "integration", "QRIS", "digital payment", "marketplace", "free trade", "agreement", "opening", "invest", "revenue", "milestone"];
+const NEG_WORDS = ["tariff", "ban", "crash", "decline", "loss", "tension", "risk", "war", "sanction", "crackdown", "fine", "penalty", "slowdown", "restriction", "compliance", "de minimis", "customs duty", "trade barrier", "shutdown", "fraud", "counterfeit", "lawsuit", "probe", "investigation"];
 
 interface ArticleResult {
   title: string;
