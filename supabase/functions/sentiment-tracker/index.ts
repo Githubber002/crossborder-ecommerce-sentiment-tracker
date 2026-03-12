@@ -1,6 +1,6 @@
 // 🌏📊 Crossborder E-commerce Sentiment Engine
 // Server-side daily caching — only hits APIs once per 24h
-// Sources: NewsData.io, Google News RSS, YouTube RSS, Perplexity AI
+// Sources: NewsData.io, Google News RSS, YouTube RSS, Shopify Blog, Perplexity AI
 // Built for crossborderalex ✨
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
@@ -11,7 +11,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const QUERY = '"cross-border e-commerce" OR Temu OR Shein OR "global commerce" OR "EU tariffs"';
+const QUERY = '"cross-border e-commerce" OR Temu OR Shein OR "global commerce" OR "EU tariffs" OR Rakuten OR Shopee';
 
 const POS_WORDS = ["growth", "surge", "boom", "success", "record", "expand", "profit", "gain", "opportunity", "thrive", "innovation", "partnership"];
 const NEG_WORDS = ["tariff", "ban", "crash", "decline", "loss", "tension", "risk", "war", "sanction", "crackdown", "fine", "penalty", "slowdown"];
@@ -89,6 +89,8 @@ async function fetchGoogleNewsRSS(): Promise<ArticleResult[]> {
       "cross-border e-commerce",
       "Temu Shein tariffs",
       "global ecommerce trade",
+      "Rakuten ecommerce",
+      "Shopee cross-border",
     ];
     const allArticles: ArticleResult[] = [];
 
@@ -143,6 +145,7 @@ async function fetchYouTubeRSS(): Promise<ArticleResult[]> {
     const queries = [
       "cross border ecommerce 2025",
       "Temu Shein trade tariffs",
+      "Rakuten Shopee ecommerce",
     ];
     const allArticles: ArticleResult[] = [];
 
@@ -222,7 +225,7 @@ async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
 
         // Only include articles relevant to cross-border / international commerce
         const text = `${title} ${summary}`.toLowerCase();
-        const relevant = ["cross-border", "international", "global", "tariff", "import", "export", "temu", "shein", "alibaba", "dropship", "ecommerce", "e-commerce", "sell online", "global commerce"].some(k => text.includes(k));
+        const relevant = ["cross-border", "international", "global", "tariff", "import", "export", "temu", "shein", "alibaba", "rakuten", "shopee", "dropship", "ecommerce", "e-commerce", "sell online", "global commerce"].some(k => text.includes(k));
         if (!relevant) continue;
 
         const { sentiment, score } = classifyText(title, summary);
@@ -261,7 +264,7 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         model: "sonar",
         messages: [
           { role: "system", content: "You are a cross-border e-commerce sentiment analyst. Respond ONLY with valid JSON, no markdown." },
-          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"]}` }
+          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"]}` }
         ],
         temperature: 0.1,
         max_tokens: 500,
