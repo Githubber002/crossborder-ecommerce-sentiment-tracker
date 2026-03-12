@@ -136,7 +136,7 @@ const Index = () => {
         >
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">How is this calculated?</h4>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            This sentiment score is generated daily by combining multiple sources. News articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, and Alibaba are collected from NewsData.io, Google News, and YouTube, then classified as positive, negative, or neutral. Perplexity AI independently analyzes the current state of the industry. The final score blends all signals (60% aggregated news, 40% AI analysis) into a single 0–100 index.
+            This sentiment score is generated daily by combining multiple sources. News articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, Alibaba, Rakuten, and Shopee are collected from NewsData.io, Google News, YouTube, and Shopify Blog, then classified as positive, negative, or neutral using cross-border specific keywords (e.g. "expansion", "QRIS", "free trade" = positive; "tariff", "trade barrier", "de minimis" = negative). Perplexity AI independently analyzes the current state of the industry. The final score blends all signals (60% aggregated news, 40% AI analysis) into a single 0–100 index.
           </p>
         </motion.div>
 
