@@ -63,6 +63,9 @@ export function OpportunityGauge({ score, label }: OpportunityGaugeProps) {
             {/* Arrow tip */}
             <polygon points="150,42 145,52 155,52" fill="hsl(0, 0%, 20%)" />
           </motion.g>
+
+          {/* Center cap overlay for clean pivot */}
+          <circle cx="150" cy="150" r="3" fill="hsl(0, 0%, 20%)" />
         </svg>
       </div>
 
