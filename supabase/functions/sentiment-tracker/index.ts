@@ -255,7 +255,7 @@ async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
   }
 }
 
-async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[] }> {
+async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[]; opportunityAdjustment: number }> {
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
@@ -264,7 +264,7 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         model: "sonar",
         messages: [
           { role: "system", content: "You are a cross-border e-commerce sentiment analyst. Respond ONLY with valid JSON, no markdown." },
-          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"]}` }
+          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"], "opportunityAdjustment": 0-20 (score how much current disruptions create business opportunities for cross-border sellers, e.g. emerging markets opening, innovation gaps, new payment rails like QRIS, platform shifts — 0=no special opportunity, 20=major opportunity window)}` }
         ],
         temperature: 0.1,
         max_tokens: 500,
@@ -280,12 +280,13 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         summary: parsed.summary || "",
         sentimentScore: typeof parsed.sentimentScore === "number" ? parsed.sentimentScore : 50,
         keyInsights: Array.isArray(parsed.keyInsights) ? parsed.keyInsights : [],
+        opportunityAdjustment: typeof parsed.opportunityAdjustment === "number" ? Math.min(20, Math.max(0, parsed.opportunityAdjustment)) : 10,
       };
     }
-    return { summary: content, sentimentScore: 50, keyInsights: [] };
+    return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
   } catch (e) {
     console.error("Perplexity error:", e);
-    return { summary: "", sentimentScore: 50, keyInsights: [] };
+    return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
   }
 }
 
@@ -358,6 +359,19 @@ Deno.serve(async (req) => {
       shopify: shopifyArticles.length,
     };
 
+    // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Adjustment (0-20)
+    const negPercent = total > 0 ? Math.round((negCount / total) * 100) : 0;
+    const neuPercent = total > 0 ? Math.round((neuCount / total) * 100) : 0;
+    const posPercent = total > 0 ? Math.round((posCount / total) * 100) : 0;
+    const rawOpportunity = (negPercent * 1.5) + (neuPercent * 0.5) + perplexity.opportunityAdjustment;
+    const opportunityScore = Math.round(Math.max(0, Math.min(100, rawOpportunity)));
+
+    let opportunityLabel: string;
+    if (opportunityScore >= 70) opportunityLabel = "Prime";
+    else if (opportunityScore >= 50) opportunityLabel = "High";
+    else if (opportunityScore >= 30) opportunityLabel = "Moderate";
+    else opportunityLabel = "Low";
+
     const result = {
       score: blendedScore,
       label,
@@ -366,11 +380,14 @@ Deno.serve(async (req) => {
       aiScore: perplexity.sentimentScore,
       aiSummary: perplexity.summary,
       aiInsights: perplexity.keyInsights,
+      opportunityScore,
+      opportunityLabel,
+      opportunityAiAdjustment: perplexity.opportunityAdjustment,
       breakdown: {
         positive: posCount, negative: negCount, neutral: neuCount, total,
-        positivePercent: total > 0 ? Math.round((posCount / total) * 100) : 0,
-        negativePercent: total > 0 ? Math.round((negCount / total) * 100) : 0,
-        neutralPercent: total > 0 ? Math.round((neuCount / total) * 100) : 0,
+        positivePercent: posPercent,
+        negativePercent: negPercent,
+        neutralPercent: neuPercent,
       },
       sourceCounts,
       articles: articles.slice(0, 12),

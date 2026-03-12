@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { SentimentGauge } from "@/components/SentimentGauge";
+import { OpportunityGauge } from "@/components/OpportunityGauge";
 import { SentimentBreakdownPanel } from "@/components/SentimentBreakdown";
 import { AiInsightsPanel } from "@/components/AiInsightsPanel";
 import { supabase } from "@/integrations/supabase/client";
@@ -28,6 +29,9 @@ interface SentimentData {
     neutralPercent: number;
   };
   timestamp: string;
+  opportunityScore: number;
+  opportunityLabel: string;
+  opportunityAiAdjustment: number;
 }
 
 const Index = () => {
@@ -107,6 +111,21 @@ const Index = () => {
               <SentimentGauge score={data.score} label={data.label} mood={data.mood} />
             </motion.div>
 
+            {/* Opportunity Radar */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="rounded-lg border border-border bg-card px-6 py-8"
+            >
+              <h3 className="mb-4 text-center font-display text-lg font-semibold text-foreground">
+                Opportunity Radar
+              </h3>
+              <OpportunityGauge score={data.opportunityScore} label={data.opportunityLabel} />
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                AI adjustment: +{data.opportunityAiAdjustment} · Formula: (Neg% × 1.5) + (Neu% × 0.5) + AI
+              </p>
+            </motion.div>
             {/* AI Insights */}
             <AiInsightsPanel
               summary={data.aiSummary}
@@ -138,6 +157,9 @@ const Index = () => {
           <p className="text-xs leading-relaxed text-muted-foreground">
             This sentiment score is generated daily by combining multiple sources. News articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, Alibaba, Rakuten, and Shopee are collected from NewsData.io, Google News, YouTube, and Shopify Blog, then classified as positive, negative, or neutral using cross-border specific keywords (e.g. "expansion", "QRIS", "free trade" = positive; "tariff", "trade barrier", "de minimis" = negative). Perplexity AI independently analyzes the current state of the industry. The final score blends all signals (60% aggregated news, 40% AI analysis) into a single 0–100 index.
           </p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            The <strong className="text-foreground">Opportunity Radar</strong> measures how much current market disruptions create business openings for cross-border sellers. It uses the formula: (Negative% × 1.5) + (Neutral% × 0.5) + AI Adjustment (0–20). More negatives amplify opportunity (disruption = openings), neutrals add moderate potential, and Perplexity AI provides a 0–20 boost when it detects themes like emerging markets, innovation gaps, or new payment rails.
+          </p>
         </motion.div>
 
         {/* Release Notes */}
@@ -149,6 +171,7 @@ const Index = () => {
         >
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Release Notes</h4>
           <ul className="space-y-1 text-xs text-muted-foreground">
+            <li><span className="font-medium text-foreground">v1.6</span> — Added Opportunity Radar gauge with weighted disruption formula + AI adjustment</li>
             <li><span className="font-medium text-foreground">v1.5</span> — Enhanced keyword classification with cross-border specific terms (QRIS, digital payments, trade barriers, de minimis)</li>
             <li><span className="font-medium text-foreground">v1.4</span> — Added Rakuten & Shopee coverage for broader global sentiment</li>
             <li><span className="font-medium text-foreground">v1.3</span> — Added Shopify Blog as sentiment source for deeper e-commerce coverage</li>
