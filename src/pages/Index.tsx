@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { SentimentGauge } from "@/components/SentimentGauge";
 import { SentimentBreakdownPanel } from "@/components/SentimentBreakdown";
-import { HeadlinesFeed } from "@/components/HeadlinesFeed";
 import { AiInsightsPanel } from "@/components/AiInsightsPanel";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,15 +27,6 @@ interface SentimentData {
     negativePercent: number;
     neutralPercent: number;
   };
-  articles: Array<{
-    title: string;
-    description: string;
-    source: string;
-    url: string;
-    sentiment: "positive" | "negative" | "neutral";
-    score: number;
-    pubDate: string;
-  }>;
   timestamp: string;
 }
 
@@ -67,7 +57,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <div className="mx-auto max-w-2xl px-4 py-10">
-        {/* Header — Substack-style clean editorial */}
+        {/* Header */}
         <motion.header
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -82,7 +72,7 @@ const Index = () => {
             })}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
-            Powered by NewsData.io + Perplexity AI · Updates daily
+            Updates daily
           </p>
         </motion.header>
 
@@ -107,7 +97,7 @@ const Index = () => {
         {/* Dashboard */}
         {data && (
           <div className="space-y-8">
-            {/* Gauge — every visitor sees the animation */}
+            {/* Gauge */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -128,17 +118,39 @@ const Index = () => {
             {/* Breakdown */}
             <SentimentBreakdownPanel breakdown={data.breakdown} />
 
-            {/* Headlines */}
-            <HeadlinesFeed articles={data.articles} />
-
-            {/* Footer */}
-            <div className="border-t border-border pt-4 text-center">
+            {/* Last updated */}
+            <div className="text-center">
               <p className="text-xs text-muted-foreground">
                 Last updated: {new Date(data.timestamp).toLocaleString("en-NL", { timeZone: "Europe/Amsterdam" })}
               </p>
             </div>
           </div>
         )}
+
+        {/* Methodology */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="mt-12 border-t border-border pt-6"
+        >
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">How is this calculated?</h4>
+          <p className="text-xs leading-relaxed text-muted-foreground">
+            This sentiment score is generated daily by combining two sources. First, recent news articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, and Alibaba are collected via NewsData.io and classified as positive, negative, or neutral based on their content. Second, Perplexity AI independently analyzes the current state of the industry and provides its own sentiment score. The final score blends both signals (60% news, 40% AI analysis) into a single 0–100 index where 0 is very negative and 100 is very positive.
+          </p>
+        </motion.div>
+
+        {/* Footer */}
+        <div className="mt-8 border-t border-border pt-6 pb-8 text-center">
+          <a
+            href="https://www.crossborderalex.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-display text-sm font-semibold text-foreground transition-colors hover:text-muted-foreground"
+          >
+            Crossborder E-commerce Sentiment Tracker by Crossborder Alex
+          </a>
+        </div>
       </div>
     </div>
   );
