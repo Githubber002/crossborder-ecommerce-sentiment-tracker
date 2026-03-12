@@ -59,7 +59,7 @@ export function OpportunityGauge({ score, label }: OpportunityGaugeProps) {
             transition={{ duration: 2, ease: [0.34, 1.56, 0.64, 1], delay: 0.8 }}
             style={{ transformOrigin: "150px 150px" }}
           >
-            <line x1="150" y1="153" x2="150" y2="52" stroke="hsl(0, 0%, 20%)" strokeWidth="2.5" strokeLinecap="round" />
+            <line x1="150" y1="150" x2="150" y2="52" stroke="hsl(0, 0%, 20%)" strokeWidth="2.5" strokeLinecap="round" />
             {/* Arrow tip */}
             <polygon points="150,42 145,52 155,52" fill="hsl(0, 0%, 20%)" />
           </motion.g>
