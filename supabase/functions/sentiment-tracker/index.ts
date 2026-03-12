@@ -1,6 +1,6 @@
 // 🌏📊 Crossborder E-commerce Sentiment Engine
 // Server-side daily caching — only hits APIs once per 24h
-// Sources: NewsData.io, Google News RSS, YouTube RSS, Perplexity AI
+// Sources: NewsData.io, Google News RSS, YouTube RSS, Shopify Blog, Perplexity AI
 // Built for crossborderalex ✨
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
