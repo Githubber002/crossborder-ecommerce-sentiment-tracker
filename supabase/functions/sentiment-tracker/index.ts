@@ -147,14 +147,12 @@ Deno.serve(async (req) => {
     // Blend scores: 60% news data, 40% Perplexity AI analysis
     const blendedScore = Math.round(newsScore * 0.6 + perplexity.sentimentScore * 0.4);
 
-    // Determine fear/greed label
+    // Determine sentiment label
     let label: string;
     let mood: string;
-    if (blendedScore >= 80) { label = "Extreme Optimism"; mood = "positive"; }
-    else if (blendedScore >= 60) { label = "Optimism"; mood = "positive"; }
-    else if (blendedScore >= 45) { label = "Neutral"; mood = "neutral"; }
-    else if (blendedScore >= 25) { label = "Fear"; mood = "negative"; }
-    else { label = "Extreme Fear"; mood = "negative"; }
+    if (blendedScore >= 65) { label = "Positive"; mood = "positive"; }
+    else if (blendedScore >= 40) { label = "Neutral"; mood = "neutral"; }
+    else { label = "Negative"; mood = "negative"; }
 
     const response = {
       score: blendedScore,
