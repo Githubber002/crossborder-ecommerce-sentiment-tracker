@@ -255,7 +255,7 @@ async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
   }
 }
 
-async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[] }> {
+async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[]; opportunityAdjustment: number }> {
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
