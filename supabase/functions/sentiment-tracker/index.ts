@@ -1,8 +1,10 @@
 // 🌏📊 Crossborder E-commerce Sentiment Engine
 // Server-side daily caching — only hits APIs once per 24h
+// Sources: NewsData.io, Google News RSS, YouTube RSS, Perplexity AI
 // Built for crossborderalex ✨
 
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { DOMParser } from "https://deno.land/x/deno_dom@v0.1.48/deno-dom-wasm.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,6 +24,16 @@ interface ArticleResult {
   sentiment: "positive" | "negative" | "neutral";
   score: number;
   pubDate: string;
+  origin: string; // "newsdata" | "google-news" | "youtube"
+}
+
+function classifyText(title: string, description: string): { sentiment: "positive" | "negative" | "neutral"; score: number } {
+  const text = `${title} ${description}`.toLowerCase();
+  const posCount = POS_WORDS.filter(w => text.includes(w)).length;
+  const negCount = NEG_WORDS.filter(w => text.includes(w)).length;
+  if (posCount > negCount) return { sentiment: "positive", score: 0.65 + (posCount * 0.03) };
+  if (negCount > posCount) return { sentiment: "negative", score: 0.35 - (negCount * 0.03) };
+  return { sentiment: "neutral", score: 0.5 };
 }
 
 function classifyArticle(article: any): ArticleResult {
@@ -38,12 +50,9 @@ function classifyArticle(article: any): ArticleResult {
     const scoreMap: Record<string, number> = { positive: 0.8, negative: 0.2, neutral: 0.5 };
     score = scoreMap[sentiment] ?? 0.5;
   } else {
-    const text = `${article.title || ""} ${article.description || ""}`.toLowerCase();
-    const posCount = POS_WORDS.filter(w => text.includes(w)).length;
-    const negCount = NEG_WORDS.filter(w => text.includes(w)).length;
-    if (posCount > negCount) { sentiment = "positive"; score = 0.65 + (posCount * 0.03); }
-    else if (negCount > posCount) { sentiment = "negative"; score = 0.35 - (negCount * 0.03); }
-    else { sentiment = "neutral"; score = 0.5; }
+    const result = classifyText(article.title || "", article.description || "");
+    sentiment = result.sentiment;
+    score = result.score;
   }
 
   return {
@@ -54,18 +63,135 @@ function classifyArticle(article: any): ArticleResult {
     sentiment,
     score: Math.max(0, Math.min(1, score)),
     pubDate: article.pubDate || "",
+    origin: "newsdata",
   };
 }
 
 async function fetchNewsData(apiKey: string): Promise<ArticleResult[]> {
-  const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&q=${encodeURIComponent(QUERY)}&language=en&country=nl,de,gb,us,cn`;
-  const res = await fetch(url);
-  if (!res.ok) {
-    console.error("NewsData.io error:", res.status, await res.text());
+  try {
+    const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&q=${encodeURIComponent(QUERY)}&language=en&country=nl,de,gb,us,cn`;
+    const res = await fetch(url);
+    if (!res.ok) {
+      console.error("NewsData.io error:", res.status, await res.text());
+      return [];
+    }
+    const data = await res.json();
+    return (data.results || []).map(classifyArticle);
+  } catch (e) {
+    console.error("NewsData.io fetch error:", e);
     return [];
   }
-  const data = await res.json();
-  return (data.results || []).map(classifyArticle);
+}
+
+async function fetchGoogleNewsRSS(): Promise<ArticleResult[]> {
+  try {
+    const queries = [
+      "cross-border e-commerce",
+      "Temu Shein tariffs",
+      "global ecommerce trade",
+    ];
+    const allArticles: ArticleResult[] = [];
+
+    for (const q of queries) {
+      const url = `https://news.google.com/rss/search?q=${encodeURIComponent(q)}&hl=en&gl=US&ceid=US:en`;
+      const res = await fetch(url);
+      if (!res.ok) {
+        console.error("Google News RSS error for query:", q, res.status);
+        continue;
+      }
+      const xml = await res.text();
+      const doc = new DOMParser().parseFromString(xml, "text/xml");
+      if (!doc) continue;
+
+      const items = doc.querySelectorAll("item");
+      for (const item of items) {
+        const title = item.querySelector("title")?.textContent || "";
+        const link = item.querySelector("link")?.textContent || "#";
+        const pubDate = item.querySelector("pubDate")?.textContent || "";
+        const source = item.querySelector("source")?.textContent || "Google News";
+
+        const { sentiment, score } = classifyText(title, "");
+        allArticles.push({
+          title,
+          description: "",
+          source,
+          url: link,
+          sentiment,
+          score: Math.max(0, Math.min(1, score)),
+          pubDate,
+          origin: "google-news",
+        });
+      }
+    }
+
+    // Deduplicate by title similarity
+    const seen = new Set<string>();
+    return allArticles.filter(a => {
+      const key = a.title.toLowerCase().slice(0, 60);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  } catch (e) {
+    console.error("Google News RSS error:", e);
+    return [];
+  }
+}
+
+async function fetchYouTubeRSS(): Promise<ArticleResult[]> {
+  try {
+    const queries = [
+      "cross border ecommerce 2025",
+      "Temu Shein trade tariffs",
+    ];
+    const allArticles: ArticleResult[] = [];
+
+    for (const q of queries) {
+      // YouTube RSS search via Invidious or direct feed
+      const url = `https://www.youtube.com/results?search_query=${encodeURIComponent(q)}&sp=CAISBAgBEAE%253D`; // Filter: today, relevance
+      // Use the RSS feed approach via Google
+      const rssUrl = `https://www.youtube.com/feeds/videos.xml?search_query=${encodeURIComponent(q)}`;
+      
+      // YouTube doesn't have a public RSS search, so we use a workaround via Google News YouTube filter
+      const googleYtUrl = `https://news.google.com/rss/search?q=${encodeURIComponent(q + " site:youtube.com")}&hl=en&gl=US&ceid=US:en`;
+      const res = await fetch(googleYtUrl);
+      if (!res.ok) continue;
+      
+      const xml = await res.text();
+      const doc = new DOMParser().parseFromString(xml, "text/xml");
+      if (!doc) continue;
+
+      const items = doc.querySelectorAll("item");
+      for (const item of items) {
+        const title = item.querySelector("title")?.textContent || "";
+        const link = item.querySelector("link")?.textContent || "#";
+        const pubDate = item.querySelector("pubDate")?.textContent || "";
+
+        const { sentiment, score } = classifyText(title, "");
+        allArticles.push({
+          title,
+          description: "",
+          source: "YouTube",
+          url: link,
+          sentiment,
+          score: Math.max(0, Math.min(1, score)),
+          pubDate,
+          origin: "youtube",
+        });
+      }
+    }
+
+    const seen = new Set<string>();
+    return allArticles.filter(a => {
+      const key = a.title.toLowerCase().slice(0, 60);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  } catch (e) {
+    console.error("YouTube RSS error:", e);
+    return [];
+  }
 }
 
 async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[] }> {
@@ -137,10 +263,17 @@ Deno.serve(async (req) => {
     const PERPLEXITY_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_KEY) throw new Error("PERPLEXITY_API_KEY not configured");
 
-    const [articles, perplexity] = await Promise.all([
+    // Fetch all sources in parallel
+    const [newsDataArticles, googleNewsArticles, youtubeArticles, perplexity] = await Promise.all([
       fetchNewsData(NEWSDATA_KEY),
+      fetchGoogleNewsRSS(),
+      fetchYouTubeRSS(),
       fetchPerplexityAnalysis(PERPLEXITY_KEY),
     ]);
+
+    // Combine all articles
+    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles];
+    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length})`);
 
     const total = articles.length;
     const posCount = articles.filter(a => a.sentiment === "positive").length;
@@ -154,6 +287,13 @@ Deno.serve(async (req) => {
     if (blendedScore >= 65) { label = "Positive"; mood = "positive"; }
     else if (blendedScore >= 40) { label = "Neutral"; mood = "neutral"; }
     else { label = "Negative"; mood = "negative"; }
+
+    // Source breakdown
+    const sourceCounts = {
+      newsdata: newsDataArticles.length,
+      googleNews: googleNewsArticles.length,
+      youtube: youtubeArticles.length,
+    };
 
     const result = {
       score: blendedScore,
@@ -169,7 +309,8 @@ Deno.serve(async (req) => {
         negativePercent: total > 0 ? Math.round((negCount / total) * 100) : 0,
         neutralPercent: total > 0 ? Math.round((neuCount / total) * 100) : 0,
       },
-      articles: articles.slice(0, 8),
+      sourceCounts,
+      articles: articles.slice(0, 12),
       timestamp: new Date().toISOString(),
     };
 

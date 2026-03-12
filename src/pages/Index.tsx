@@ -140,8 +140,23 @@ const Index = () => {
           </p>
         </motion.div>
 
+        {/* Release Notes */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="mt-8 border-t border-border pt-6"
+        >
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Release Notes</h4>
+          <ul className="space-y-1 text-xs text-muted-foreground">
+            <li><span className="font-medium text-foreground">v1.2</span> — Added Google News & YouTube as free sources for broader coverage</li>
+            <li><span className="font-medium text-foreground">v1.1</span> — Added AI analysis via Perplexity, sentiment gauge & breakdown panel</li>
+            <li><span className="font-medium text-foreground">v1.0</span> — Initial launch with NewsData.io sentiment tracking</li>
+          </ul>
+        </motion.div>
+
         {/* Footer */}
-        <div className="mt-8 border-t border-border pt-6 pb-8 text-center">
+        <div className="mt-6 border-t border-border pt-6 pb-8 text-center">
           <a
             href="https://www.crossborderalex.com"
             target="_blank"
