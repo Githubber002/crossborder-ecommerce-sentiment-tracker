@@ -322,16 +322,17 @@ Deno.serve(async (req) => {
     if (!PERPLEXITY_KEY) throw new Error("PERPLEXITY_API_KEY not configured");
 
     // Fetch all sources in parallel
-    const [newsDataArticles, googleNewsArticles, youtubeArticles, perplexity] = await Promise.all([
+    const [newsDataArticles, googleNewsArticles, youtubeArticles, shopifyArticles, perplexity] = await Promise.all([
       fetchNewsData(NEWSDATA_KEY),
       fetchGoogleNewsRSS(),
       fetchYouTubeRSS(),
+      fetchShopifyBlogRSS(),
       fetchPerplexityAnalysis(PERPLEXITY_KEY),
     ]);
 
     // Combine all articles
-    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles];
-    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length})`);
+    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles, ...shopifyArticles];
+    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length}), Shopify(${shopifyArticles.length})`);
 
     const total = articles.length;
     const posCount = articles.filter(a => a.sentiment === "positive").length;
