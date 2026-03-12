@@ -58,7 +58,7 @@ function classifyArticle(article: any): ArticleResult {
 }
 
 async function fetchNewsData(apiKey: string): Promise<ArticleResult[]> {
-  const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&q=${encodeURIComponent(QUERY)}&language=en,nl&country=nl,be,de,fr,gb,us,cn&size=10`;
+  const url = `https://newsdata.io/api/1/news?apikey=${apiKey}&q=${encodeURIComponent(QUERY)}&language=en&country=nl,de,gb,us,cn`;
   const res = await fetch(url);
   if (!res.ok) {
     console.error("NewsData.io error:", res.status, await res.text());
