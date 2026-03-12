@@ -1,6 +1,4 @@
-// 🎯 Fear & Greed Gauge — Bitcoin sentiment tracker style
-// A beautiful semicircle gauge with gradient colors
-
+// 🎯 Sentiment Gauge — Positive / Neutral / Negative semicircle
 import { motion } from "framer-motion";
 
 interface GaugeProps {
@@ -10,7 +8,6 @@ interface GaugeProps {
 }
 
 export function SentimentGauge({ score, label, mood }: GaugeProps) {
-  // Map 0-100 to -90 to 90 degrees for semicircle
   const rotation = -90 + (score / 100) * 180;
 
   const moodColors: Record<string, string> = {
@@ -21,7 +18,6 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
 
   return (
     <div className="flex flex-col items-center">
-      {/* Gauge SVG */}
       <div className="relative h-48 w-80 md:h-56 md:w-96">
         <svg viewBox="0 0 300 170" className="h-full w-full">
           <defs>
@@ -74,9 +70,9 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
           })}
 
           {/* Labels */}
-          <text x="20" y="165" fill="hsl(0, 75%, 55%)" fontSize="10" fontFamily="Space Grotesk">Extreme Fear</text>
-          <text x="220" y="165" fill="hsl(145, 70%, 50%)" fontSize="10" fontFamily="Space Grotesk">Extreme Optimism</text>
-          <text x="130" y="30" fill="hsl(45, 95%, 55%)" fontSize="10" fontFamily="Space Grotesk">Neutral</text>
+          <text x="25" y="165" fill="hsl(0, 75%, 55%)" fontSize="11" fontFamily="Space Grotesk">Negative</text>
+          <text x="230" y="165" fill="hsl(145, 70%, 50%)" fontSize="11" fontFamily="Space Grotesk">Positive</text>
+          <text x="130" y="30" fill="hsl(45, 95%, 55%)" fontSize="11" fontFamily="Space Grotesk">Neutral</text>
 
           {/* Needle */}
           <motion.g
@@ -91,7 +87,6 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
               strokeWidth="3"
               strokeLinecap="round"
             />
-            {/* Needle glow */}
             <line
               x1="150" y1="150" x2="150" y2="55"
               stroke="hsl(60, 10%, 92%)"
@@ -106,7 +101,6 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
         </svg>
       </div>
 
-      {/* Score display */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
