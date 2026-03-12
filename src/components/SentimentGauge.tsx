@@ -47,8 +47,8 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
           })}
 
           {/* Labels */}
-          <text x="10" y="148" fill="hsl(0, 65%, 50%)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="start">Negative</text>
-          <text x="290" y="148" fill="hsl(152, 55%, 42%)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="end">Positive</text>
+          <text x="30" y="168" fill="hsl(0, 65%, 50%)" fontSize="9" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="middle">Negative</text>
+          <text x="270" y="168" fill="hsl(152, 55%, 42%)" fontSize="9" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="middle">Positive</text>
           <text x="150" y="28" fill="hsl(38, 80%, 52%)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="middle">Neutral</text>
 
           {/* Needle — animated from left to final position */}
