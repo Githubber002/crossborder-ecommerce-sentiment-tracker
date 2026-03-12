@@ -286,7 +286,7 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
     return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
   } catch (e) {
     console.error("Perplexity error:", e);
-    return { summary: "", sentimentScore: 50, keyInsights: [] };
+    return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
   }
 }
 
