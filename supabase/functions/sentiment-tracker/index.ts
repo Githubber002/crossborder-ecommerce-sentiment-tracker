@@ -264,7 +264,7 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         model: "sonar",
         messages: [
           { role: "system", content: "You are a cross-border e-commerce sentiment analyst. Respond ONLY with valid JSON, no markdown." },
-          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"]}` }
+          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"]}` }
         ],
         temperature: 0.1,
         max_tokens: 500,
