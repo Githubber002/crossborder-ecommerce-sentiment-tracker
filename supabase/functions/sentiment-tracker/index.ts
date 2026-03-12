@@ -145,6 +145,7 @@ async function fetchYouTubeRSS(): Promise<ArticleResult[]> {
     const queries = [
       "cross border ecommerce 2025",
       "Temu Shein trade tariffs",
+      "Rakuten Shopee ecommerce",
     ];
     const allArticles: ArticleResult[] = [];
 
