@@ -280,6 +280,7 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         summary: parsed.summary || "",
         sentimentScore: typeof parsed.sentimentScore === "number" ? parsed.sentimentScore : 50,
         keyInsights: Array.isArray(parsed.keyInsights) ? parsed.keyInsights : [],
+        opportunityAdjustment: typeof parsed.opportunityAdjustment === "number" ? Math.min(20, Math.max(0, parsed.opportunityAdjustment)) : 10,
       };
     }
     return { summary: content, sentimentScore: 50, keyInsights: [] };
