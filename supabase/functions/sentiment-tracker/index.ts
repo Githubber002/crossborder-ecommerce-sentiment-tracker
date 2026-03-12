@@ -33,7 +33,7 @@ function classifyArticle(article: any): ArticleResult {
     if (posProb > 0.6) { sentiment = "positive"; score = posProb; }
     else if (posProb < 0.4) { sentiment = "negative"; score = posProb; }
     else { sentiment = "neutral"; score = posProb; }
-  } else if (article.sentiment) {
+  } else if (article.sentiment && ["positive", "negative", "neutral"].includes(article.sentiment.toLowerCase())) {
     sentiment = article.sentiment.toLowerCase();
     const scoreMap: Record<string, number> = { positive: 0.8, negative: 0.2, neutral: 0.5 };
     score = scoreMap[sentiment] ?? 0.5;
