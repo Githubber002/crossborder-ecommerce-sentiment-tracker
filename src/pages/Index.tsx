@@ -136,12 +136,27 @@ const Index = () => {
         >
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">How is this calculated?</h4>
           <p className="text-xs leading-relaxed text-muted-foreground">
-            This sentiment score is generated daily by combining two sources. First, recent news articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, and Alibaba are collected via NewsData.io and classified as positive, negative, or neutral based on their content. Second, Perplexity AI independently analyzes the current state of the industry and provides its own sentiment score. The final score blends both signals (60% news, 40% AI analysis) into a single 0–100 index where 0 is very negative and 100 is very positive.
+            This sentiment score is generated daily by combining multiple sources. News articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, and Alibaba are collected from NewsData.io, Google News, and YouTube, then classified as positive, negative, or neutral. Perplexity AI independently analyzes the current state of the industry. The final score blends all signals (60% aggregated news, 40% AI analysis) into a single 0–100 index.
           </p>
         </motion.div>
 
+        {/* Release Notes */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.2 }}
+          className="mt-8 border-t border-border pt-6"
+        >
+          <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Release Notes</h4>
+          <ul className="space-y-1 text-xs text-muted-foreground">
+            <li><span className="font-medium text-foreground">v1.2</span> — Added Google News & YouTube as free sources for broader coverage</li>
+            <li><span className="font-medium text-foreground">v1.1</span> — Added AI analysis via Perplexity, sentiment gauge & breakdown panel</li>
+            <li><span className="font-medium text-foreground">v1.0</span> — Initial launch with NewsData.io sentiment tracking</li>
+          </ul>
+        </motion.div>
+
         {/* Footer */}
-        <div className="mt-8 border-t border-border pt-6 pb-8 text-center">
+        <div className="mt-6 border-t border-border pt-6 pb-8 text-center">
           <a
             href="https://www.crossborderalex.com"
             target="_blank"
