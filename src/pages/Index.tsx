@@ -171,6 +171,7 @@ const Index = () => {
         >
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Release Notes</h4>
           <ul className="space-y-1 text-xs text-muted-foreground">
+            <li><span className="font-medium text-foreground">v1.6</span> — Added Opportunity Radar gauge with weighted disruption formula + AI adjustment</li>
             <li><span className="font-medium text-foreground">v1.5</span> — Enhanced keyword classification with cross-border specific terms (QRIS, digital payments, trade barriers, de minimis)</li>
             <li><span className="font-medium text-foreground">v1.4</span> — Added Rakuten & Shopee coverage for broader global sentiment</li>
             <li><span className="font-medium text-foreground">v1.3</span> — Added Shopify Blog as sentiment source for deeper e-commerce coverage</li>
