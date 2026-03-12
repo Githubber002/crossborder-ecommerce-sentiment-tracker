@@ -89,6 +89,8 @@ async function fetchGoogleNewsRSS(): Promise<ArticleResult[]> {
       "cross-border e-commerce",
       "Temu Shein tariffs",
       "global ecommerce trade",
+      "Rakuten ecommerce",
+      "Shopee cross-border",
     ];
     const allArticles: ArticleResult[] = [];
 
