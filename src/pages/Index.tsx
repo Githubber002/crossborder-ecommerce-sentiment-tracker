@@ -157,6 +157,9 @@ const Index = () => {
           <p className="text-xs leading-relaxed text-muted-foreground">
             This sentiment score is generated daily by combining multiple sources. News articles about cross-border e-commerce, global trade, and platforms like Temu, Shein, Alibaba, Rakuten, and Shopee are collected from NewsData.io, Google News, YouTube, and Shopify Blog, then classified as positive, negative, or neutral using cross-border specific keywords (e.g. "expansion", "QRIS", "free trade" = positive; "tariff", "trade barrier", "de minimis" = negative). Perplexity AI independently analyzes the current state of the industry. The final score blends all signals (60% aggregated news, 40% AI analysis) into a single 0–100 index.
           </p>
+          <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+            The <strong className="text-foreground">Opportunity Radar</strong> measures how much current market disruptions create business openings for cross-border sellers. It uses the formula: (Negative% × 1.5) + (Neutral% × 0.5) + AI Adjustment (0–20). More negatives amplify opportunity (disruption = openings), neutrals add moderate potential, and Perplexity AI provides a 0–20 boost when it detects themes like emerging markets, innovation gaps, or new payment rails.
+          </p>
         </motion.div>
 
         {/* Release Notes */}
