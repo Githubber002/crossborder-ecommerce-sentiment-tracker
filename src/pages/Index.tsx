@@ -111,6 +111,21 @@ const Index = () => {
               <SentimentGauge score={data.score} label={data.label} mood={data.mood} />
             </motion.div>
 
+            {/* Opportunity Radar */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.4, delay: 0.2 }}
+              className="rounded-lg border border-border bg-card px-6 py-8"
+            >
+              <h3 className="mb-4 text-center font-display text-lg font-semibold text-foreground">
+                Opportunity Radar
+              </h3>
+              <OpportunityGauge score={data.opportunityScore} label={data.opportunityLabel} />
+              <p className="mt-3 text-center text-xs text-muted-foreground">
+                AI adjustment: +{data.opportunityAiAdjustment} · Formula: (Neg% × 1.5) + (Neu% × 0.5) + AI
+              </p>
+            </motion.div>
             {/* AI Insights */}
             <AiInsightsPanel
               summary={data.aiSummary}
