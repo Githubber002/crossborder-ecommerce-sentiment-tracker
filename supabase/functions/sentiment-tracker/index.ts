@@ -283,7 +283,7 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         opportunityAdjustment: typeof parsed.opportunityAdjustment === "number" ? Math.min(20, Math.max(0, parsed.opportunityAdjustment)) : 10,
       };
     }
-    return { summary: content, sentimentScore: 50, keyInsights: [] };
+    return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
   } catch (e) {
     console.error("Perplexity error:", e);
     return { summary: "", sentimentScore: 50, keyInsights: [] };
