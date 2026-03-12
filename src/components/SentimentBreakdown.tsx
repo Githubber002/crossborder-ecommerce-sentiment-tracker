@@ -1,38 +1,38 @@
-// 📊 Sentiment Breakdown — ASCII progress bars, terminal style
+// 📊 Sentiment Breakdown — progress bars
 import { motion } from "framer-motion";
-import { SentimentBreakdown } from "@/types/sentiment";
 
-function ProgressBar({ label, emoji, percent, colorClass, delay }: {
-  label: string; emoji: string; percent: number; colorClass: string; delay: number;
+interface BreakdownProps {
+  positive: number;
+  negative: number;
+  neutral: number;
+  positivePercent: number;
+  negativePercent: number;
+  neutralPercent: number;
+  total: number;
+}
+
+function Bar({ label, emoji, percent, colorClass, bgClass, delay }: {
+  label: string; emoji: string; percent: number; colorClass: string; bgClass: string; delay: number;
 }) {
   return (
     <div className="space-y-1">
       <div className="flex items-center justify-between font-mono text-sm">
         <span className={colorClass}>{emoji} {label}</span>
-        <span className="text-muted-foreground">{percent.toFixed(0)}%</span>
+        <span className="text-muted-foreground">{percent}%</span>
       </div>
-      <div className="h-3 w-full overflow-hidden rounded-sm bg-secondary">
+      <div className="h-2.5 w-full overflow-hidden rounded-full bg-secondary">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${percent}%` }}
           transition={{ duration: 0.8, delay, ease: "easeOut" }}
-          className={`h-full rounded-sm ${colorClass === "text-sentiment-positive" ? "bg-sentiment-positive" : colorClass === "text-sentiment-negative" ? "bg-sentiment-negative" : "bg-sentiment-neutral"}`}
+          className={`h-full rounded-full ${bgClass}`}
         />
       </div>
     </div>
   );
 }
 
-export function SentimentBreakdownPanel({ breakdown, trend }: {
-  breakdown: SentimentBreakdown; trend: "improving" | "declining" | "stable";
-}) {
-  const trendConfig = {
-    improving: { icon: "↑", label: "Improving!", colorClass: "text-sentiment-positive" },
-    declining: { icon: "↓", label: "Tension Rising!", colorClass: "text-sentiment-negative" },
-    stable: { icon: "→", label: "Stable", colorClass: "text-sentiment-neutral" },
-  };
-  const t = trendConfig[trend];
-
+export function SentimentBreakdownPanel({ breakdown }: { breakdown: BreakdownProps }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -41,20 +41,14 @@ export function SentimentBreakdownPanel({ breakdown, trend }: {
       className="rounded-lg border border-border bg-card p-6"
     >
       <h3 className="mb-4 font-display text-lg font-semibold text-foreground">
-        Sentiment Breakdown
+        News Breakdown
       </h3>
+      <p className="mb-3 text-xs text-muted-foreground">{breakdown.total} articles analyzed</p>
 
-      <div className="space-y-4">
-        <ProgressBar label="Positive" emoji="😊" percent={breakdown.positivePercent} colorClass="text-sentiment-positive" delay={0.4} />
-        <ProgressBar label="Negative" emoji="😠" percent={breakdown.negativePercent} colorClass="text-sentiment-negative" delay={0.5} />
-        <ProgressBar label="Neutral" emoji="😐" percent={breakdown.neutralPercent} colorClass="text-sentiment-neutral" delay={0.6} />
-      </div>
-
-      <div className="mt-5 flex items-center gap-2 rounded-md bg-secondary px-4 py-2">
-        <span className={`font-display text-xl font-bold ${t.colorClass}`}>{t.icon}</span>
-        <span className="font-mono text-sm text-secondary-foreground">
-          Trend: <span className={`font-semibold ${t.colorClass}`}>{t.label}</span>
-        </span>
+      <div className="space-y-3">
+        <Bar label="Positive" emoji="😊" percent={breakdown.positivePercent} colorClass="text-sentiment-positive" bgClass="bg-sentiment-positive" delay={0.4} />
+        <Bar label="Negative" emoji="😠" percent={breakdown.negativePercent} colorClass="text-sentiment-negative" bgClass="bg-sentiment-negative" delay={0.5} />
+        <Bar label="Neutral" emoji="😐" percent={breakdown.neutralPercent} colorClass="text-sentiment-neutral" bgClass="bg-sentiment-neutral" delay={0.6} />
       </div>
     </motion.div>
   );

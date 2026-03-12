@@ -1,1 +1,4 @@
 project_id = "rkydchbkiiidamudtrom"
+
+[functions.sentiment-tracker]
+verify_jwt = false
