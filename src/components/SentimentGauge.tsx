@@ -51,6 +51,9 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
           <text x="270" y="168" fill="hsl(152, 55%, 42%)" fontSize="9" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="middle">Positive</text>
           <text x="150" y="28" fill="hsl(38, 80%, 52%)" fontSize="10" fontFamily="Inter, sans-serif" fontWeight="500" textAnchor="middle">Neutral</text>
 
+          {/* Center dot background — behind needle */}
+          <circle cx="150" cy="150" r="7" fill="hsl(0, 0%, 100%)" stroke="hsl(0, 0%, 20%)" strokeWidth="2" />
+
           {/* Needle — animated from left to final position */}
           <motion.g
             initial={{ rotate: -90 }}
@@ -62,8 +65,7 @@ export function SentimentGauge({ score, label, mood }: GaugeProps) {
             <circle cx="150" cy="48" r="4" fill="hsl(0, 0%, 20%)" />
           </motion.g>
 
-          {/* Center dot */}
-          <circle cx="150" cy="150" r="7" fill="hsl(0, 0%, 100%)" stroke="hsl(0, 0%, 20%)" strokeWidth="2" />
+          {/* Center dot overlay */}
           <circle cx="150" cy="150" r="3" fill="hsl(0, 0%, 20%)" />
         </svg>
       </div>
