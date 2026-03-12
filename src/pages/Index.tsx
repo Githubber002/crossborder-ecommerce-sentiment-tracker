@@ -29,6 +29,9 @@ interface SentimentData {
     neutralPercent: number;
   };
   timestamp: string;
+  opportunityScore: number;
+  opportunityLabel: string;
+  opportunityAiAdjustment: number;
 }
 
 const Index = () => {
