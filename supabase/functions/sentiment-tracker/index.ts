@@ -9,7 +9,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version',
 };
 
-const QUERY = '("cross-border e-commerce" OR "international e-commerce" OR "global commerce" OR "cross border trade" OR "cross-border retail" OR "global supply chain" OR "tariffs e-commerce" OR Temu OR Shein OR "Alibaba global" OR "EU tariffs retail")';
+const QUERY = '"cross-border e-commerce" OR Temu OR Shein OR "global commerce" OR "EU tariffs"';
 
 const POS_WORDS = ["growth", "surge", "boom", "success", "record", "expand", "profit", "gain", "opportunity", "thrive", "innovation", "partnership"];
 const NEG_WORDS = ["tariff", "ban", "crash", "decline", "loss", "tension", "risk", "war", "sanction", "crackdown", "fine", "penalty", "slowdown"];
