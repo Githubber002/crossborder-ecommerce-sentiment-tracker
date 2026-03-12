@@ -352,6 +352,7 @@ Deno.serve(async (req) => {
       newsdata: newsDataArticles.length,
       googleNews: googleNewsArticles.length,
       youtube: youtubeArticles.length,
+      shopify: shopifyArticles.length,
     };
 
     const result = {
