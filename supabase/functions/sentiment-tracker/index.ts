@@ -225,7 +225,7 @@ async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
 
         // Only include articles relevant to cross-border / international commerce
         const text = `${title} ${summary}`.toLowerCase();
-        const relevant = ["cross-border", "international", "global", "tariff", "import", "export", "temu", "shein", "alibaba", "dropship", "ecommerce", "e-commerce", "sell online", "global commerce"].some(k => text.includes(k));
+        const relevant = ["cross-border", "international", "global", "tariff", "import", "export", "temu", "shein", "alibaba", "rakuten", "shopee", "dropship", "ecommerce", "e-commerce", "sell online", "global commerce"].some(k => text.includes(k));
         if (!relevant) continue;
 
         const { sentiment, score } = classifyText(title, summary);
