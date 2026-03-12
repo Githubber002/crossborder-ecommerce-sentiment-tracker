@@ -194,6 +194,64 @@ async function fetchYouTubeRSS(): Promise<ArticleResult[]> {
   }
 }
 
+async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
+  try {
+    // Shopify's blog covers cross-border commerce, global selling, and e-commerce trends
+    const feeds = [
+      "https://www.shopify.com/blog/topics/guides.atom",
+      "https://www.shopify.com/blog.atom",
+    ];
+    const allArticles: ArticleResult[] = [];
+
+    for (const feedUrl of feeds) {
+      const res = await fetch(feedUrl);
+      if (!res.ok) {
+        console.error("Shopify blog RSS error:", res.status);
+        continue;
+      }
+      const xml = await res.text();
+      const doc = new DOMParser().parseFromString(xml, "text/xml");
+      if (!doc) continue;
+
+      const entries = doc.querySelectorAll("entry");
+      for (const entry of entries) {
+        const title = entry.querySelector("title")?.textContent || "";
+        const link = entry.querySelector("link")?.getAttribute("href") || "#";
+        const published = entry.querySelector("published")?.textContent || "";
+        const summary = entry.querySelector("summary")?.textContent || "";
+
+        // Only include articles relevant to cross-border / international commerce
+        const text = `${title} ${summary}`.toLowerCase();
+        const relevant = ["cross-border", "international", "global", "tariff", "import", "export", "temu", "shein", "alibaba", "dropship", "ecommerce", "e-commerce", "sell online", "global commerce"].some(k => text.includes(k));
+        if (!relevant) continue;
+
+        const { sentiment, score } = classifyText(title, summary);
+        allArticles.push({
+          title,
+          description: summary.slice(0, 200),
+          source: "Shopify Blog",
+          url: link,
+          sentiment,
+          score: Math.max(0, Math.min(1, score)),
+          pubDate: published,
+          origin: "shopify",
+        });
+      }
+    }
+
+    const seen = new Set<string>();
+    return allArticles.filter(a => {
+      const key = a.title.toLowerCase().slice(0, 60);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 10);
+  } catch (e) {
+    console.error("Shopify blog RSS error:", e);
+    return [];
+  }
+}
+
 async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[] }> {
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
