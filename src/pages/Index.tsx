@@ -112,20 +112,22 @@ const Index = () => {
             </motion.div>
 
             {/* Opportunity Radar */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="rounded-lg border border-border bg-card px-6 py-8"
-            >
-              <h3 className="mb-4 text-center font-display text-lg font-semibold text-foreground">
-                Opportunity Radar
-              </h3>
-              <OpportunityGauge score={data.opportunityScore} label={data.opportunityLabel} />
-              <p className="mt-3 text-center text-xs text-muted-foreground">
-                AI adjustment: +{data.opportunityAiAdjustment} · Formula: (Neg% × 1.5) + (Neu% × 0.5) + AI
-              </p>
-            </motion.div>
+            {data.opportunityScore != null && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.2 }}
+                className="rounded-lg border border-border bg-card px-6 py-8"
+              >
+                <h3 className="mb-4 text-center font-display text-lg font-semibold text-foreground">
+                  Opportunity Radar
+                </h3>
+                <OpportunityGauge score={data.opportunityScore} label={data.opportunityLabel} />
+                <p className="mt-4 text-center text-xs leading-relaxed text-muted-foreground max-w-sm mx-auto">
+                  When the market is disrupted — tariffs, trade barriers, platform shifts — new opportunities open up for cross-border sellers who move fast. The more negative the news, the bigger the window. AI scans for emerging trends like new markets and payment innovations to fine-tune the score.
+                </p>
+              </motion.div>
+            )}
             {/* AI Insights */}
             <AiInsightsPanel
               summary={data.aiSummary}
