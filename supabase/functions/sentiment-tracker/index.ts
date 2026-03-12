@@ -359,6 +359,19 @@ Deno.serve(async (req) => {
       shopify: shopifyArticles.length,
     };
 
+    // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Adjustment (0-20)
+    const negPercent = total > 0 ? Math.round((negCount / total) * 100) : 0;
+    const neuPercent = total > 0 ? Math.round((neuCount / total) * 100) : 0;
+    const posPercent = total > 0 ? Math.round((posCount / total) * 100) : 0;
+    const rawOpportunity = (negPercent * 1.5) + (neuPercent * 0.5) + perplexity.opportunityAdjustment;
+    const opportunityScore = Math.round(Math.max(0, Math.min(100, rawOpportunity)));
+
+    let opportunityLabel: string;
+    if (opportunityScore >= 70) opportunityLabel = "Prime";
+    else if (opportunityScore >= 50) opportunityLabel = "High";
+    else if (opportunityScore >= 30) opportunityLabel = "Moderate";
+    else opportunityLabel = "Low";
+
     const result = {
       score: blendedScore,
       label,
@@ -367,11 +380,14 @@ Deno.serve(async (req) => {
       aiScore: perplexity.sentimentScore,
       aiSummary: perplexity.summary,
       aiInsights: perplexity.keyInsights,
+      opportunityScore,
+      opportunityLabel,
+      opportunityAiAdjustment: perplexity.opportunityAdjustment,
       breakdown: {
         positive: posCount, negative: negCount, neutral: neuCount, total,
-        positivePercent: total > 0 ? Math.round((posCount / total) * 100) : 0,
-        negativePercent: total > 0 ? Math.round((negCount / total) * 100) : 0,
-        neutralPercent: total > 0 ? Math.round((neuCount / total) * 100) : 0,
+        positivePercent: posPercent,
+        negativePercent: negPercent,
+        neutralPercent: neuPercent,
       },
       sourceCounts,
       articles: articles.slice(0, 12),

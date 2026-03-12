@@ -6,6 +6,7 @@ import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { RefreshCw } from "lucide-react";
 import { SentimentGauge } from "@/components/SentimentGauge";
+import { OpportunityGauge } from "@/components/OpportunityGauge";
 import { SentimentBreakdownPanel } from "@/components/SentimentBreakdown";
 import { AiInsightsPanel } from "@/components/AiInsightsPanel";
 import { supabase } from "@/integrations/supabase/client";
