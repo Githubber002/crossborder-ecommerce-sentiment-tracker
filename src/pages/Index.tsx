@@ -68,7 +68,7 @@ const Index = () => {
           className="mb-10 border-b border-border pb-6 text-center"
         >
           <h1 className="font-display text-3xl font-bold text-foreground md:text-4xl">
-            Crossborder E-commerce Sentiment Tracker
+            Global Crossborder E-commerce Sentiment Tracker
           </h1>
           <p className="mt-2 text-sm text-muted-foreground">
             by Crossborder Alex · {new Date().toLocaleDateString("en-NL", {
