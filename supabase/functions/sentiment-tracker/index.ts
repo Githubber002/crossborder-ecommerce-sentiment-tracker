@@ -363,11 +363,19 @@ Deno.serve(async (req) => {
       shopify: shopifyArticles.length,
     };
 
-    // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Adjustment (0-20)
+    // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Disruption + AI Entrepreneurial Buzz + Keyword Bonus
     const negPercent = total > 0 ? Math.round((negCount / total) * 100) : 0;
     const neuPercent = total > 0 ? Math.round((neuCount / total) * 100) : 0;
     const posPercent = total > 0 ? Math.round((posCount / total) * 100) : 0;
-    const rawOpportunity = (negPercent * 1.5) + (neuPercent * 0.5) + perplexity.opportunityAdjustment;
+
+    // Count entrepreneurial/opportunity keywords across all articles
+    const oppKeywordHits = articles.reduce((sum, a) => {
+      const text = `${a.title} ${a.description}`.toLowerCase();
+      return sum + OPP_WORDS.filter(w => text.includes(w.toLowerCase())).length;
+    }, 0);
+    const oppKeywordBonus = Math.min(15, Math.round(oppKeywordHits * 0.5));
+
+    const rawOpportunity = (negPercent * 1.5) + (neuPercent * 0.5) + perplexity.opportunityAdjustment + perplexity.entrepreneurialBuzz + oppKeywordBonus;
     const opportunityScore = Math.round(Math.max(0, Math.min(100, rawOpportunity)));
 
     let opportunityLabel: string;
@@ -387,6 +395,8 @@ Deno.serve(async (req) => {
       opportunityScore,
       opportunityLabel,
       opportunityAiAdjustment: perplexity.opportunityAdjustment,
+      entrepreneurialBuzz: perplexity.entrepreneurialBuzz,
+      oppKeywordBonus,
       breakdown: {
         positive: posCount, negative: negCount, neutral: neuCount, total,
         positivePercent: posPercent,
