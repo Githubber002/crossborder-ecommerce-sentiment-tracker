@@ -258,7 +258,7 @@ async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
   }
 }
 
-async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[]; opportunityAdjustment: number }> {
+async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[]; opportunityAdjustment: number; entrepreneurialBuzz: number }> {
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
@@ -267,13 +267,13 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         model: "sonar",
         messages: [
           { role: "system", content: "You are a cross-border e-commerce sentiment analyst. Respond ONLY with valid JSON, no markdown." },
-          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"], "opportunityAdjustment": 0-20 (score how much current disruptions create business opportunities for cross-border sellers, e.g. emerging markets opening, innovation gaps, new payment rails like QRIS, platform shifts — 0=no special opportunity, 20=major opportunity window)}` }
+          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"], "opportunityAdjustment": 0-20 (score how much current disruptions create business opportunities for cross-border sellers, e.g. emerging markets opening, innovation gaps, new payment rails like QRIS, platform shifts — 0=no special opportunity, 20=major opportunity window), "entrepreneurialBuzz": 0-20 (score how much people are currently talking about starting new cross-border businesses, new seller registrations, new brand launches, dropshipping/private label ideas, side hustles in global e-commerce, market entry plans — 0=no buzz, 20=massive entrepreneurial energy)}` }
         ],
         temperature: 0.1,
-        max_tokens: 500,
+        max_tokens: 600,
       }),
     });
-    if (!res.ok) { console.error("Perplexity error:", res.status); return { summary: "", sentimentScore: 50, keyInsights: [] }; }
+    if (!res.ok) { console.error("Perplexity error:", res.status); return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10, entrepreneurialBuzz: 10 }; }
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || "{}";
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -284,12 +284,13 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         sentimentScore: typeof parsed.sentimentScore === "number" ? parsed.sentimentScore : 50,
         keyInsights: Array.isArray(parsed.keyInsights) ? parsed.keyInsights : [],
         opportunityAdjustment: typeof parsed.opportunityAdjustment === "number" ? Math.min(20, Math.max(0, parsed.opportunityAdjustment)) : 10,
+        entrepreneurialBuzz: typeof parsed.entrepreneurialBuzz === "number" ? Math.min(20, Math.max(0, parsed.entrepreneurialBuzz)) : 10,
       };
     }
-    return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
+    return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10, entrepreneurialBuzz: 10 };
   } catch (e) {
     console.error("Perplexity error:", e);
-    return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
+    return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10, entrepreneurialBuzz: 10 };
   }
 }
 
