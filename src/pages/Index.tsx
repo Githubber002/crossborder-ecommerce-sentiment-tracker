@@ -173,6 +173,7 @@ const Index = () => {
         >
           <h4 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">Release Notes</h4>
           <ul className="space-y-1 text-xs text-muted-foreground">
+            <li><span className="font-medium text-foreground">v1.9</span> — Added Strait of Hormuz, Red Sea/Houthi disruptions, oil & fuel shocks, shipping route closures as negative signals — transport risk coverage</li>
             <li><span className="font-medium text-foreground">v1.8</span> — Added Digital Service Tax (DST), location fees & advertising levies (Austria, France, Italy, Spain, Türkiye, UK) as negative signals</li>
             <li><span className="font-medium text-foreground">v1.7</span> — Sustainability & green regulation terms (CBAM, carbon tax, ESG, greenwashing) classified as negative — added compliance cost reality</li>
             <li><span className="font-medium text-foreground">v1.6</span> — Added Opportunity Radar gauge with weighted disruption formula + AI adjustment</li>
