@@ -441,6 +441,7 @@ Deno.serve(async (req) => {
       googleNews: googleNewsArticles.length,
       youtube: youtubeArticles.length,
       shopify: shopifyArticles.length,
+      firehose: firehoseArticles.length,
     };
 
     // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Disruption + AI Entrepreneurial Buzz + Keyword Bonus
