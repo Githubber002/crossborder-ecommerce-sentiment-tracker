@@ -200,6 +200,84 @@ async function fetchYouTubeRSS(): Promise<ArticleResult[]> {
   }
 }
 
+async function fetchFirehose(tapToken: string): Promise<ArticleResult[]> {
+  try {
+    const FIREHOSE_API = "https://api.firehose.com";
+
+    // Fetch stream of recent mentions (last 24h)
+    const url = `${FIREHOSE_API}/v1/stream?timeout=15&since=24h&limit=100`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: {
+        "Authorization": `Bearer ${tapToken}`,
+        "Accept": "text/event-stream",
+      },
+    });
+
+    if (!res.ok) {
+      console.error("Firehose API error:", res.status, await res.text());
+      return [];
+    }
+
+    const sseText = await res.text();
+
+    // Parse SSE events
+    const articles: ArticleResult[] = [];
+    let eventType = "";
+    let dataStr = "";
+
+    for (const line of sseText.split("\n")) {
+      const trimmed = line.trim();
+      if (trimmed === "") {
+        if (eventType === "update" && dataStr) {
+          try {
+            const payload = JSON.parse(dataStr);
+            const doc = payload.document || {};
+            const title = doc.title || "";
+            const pageUrl = doc.url || "#";
+            const matchedAt = payload.matched_at || "";
+
+            // Only include if relevant to cross-border e-commerce
+            const text = title.toLowerCase();
+            const relevant = ["cross-border", "e-commerce", "ecommerce", "temu", "shein", "alibaba", "rakuten", "shopee", "tariff", "global commerce", "import", "export", "dropship", "trade"].some(k => text.includes(k));
+            if (relevant) {
+              const { sentiment, score } = classifyText(title, "");
+              articles.push({
+                title,
+                description: "",
+                source: "Firehose",
+                url: pageUrl,
+                sentiment,
+                score: Math.max(0, Math.min(1, score)),
+                pubDate: matchedAt,
+                origin: "firehose",
+              });
+            }
+          } catch { /* skip */ }
+        }
+        eventType = "";
+        dataStr = "";
+        continue;
+      }
+      if (trimmed.startsWith("event:")) eventType = trimmed.slice(6).trim();
+      else if (trimmed.startsWith("data:")) dataStr = trimmed.slice(5).trim();
+      else if (trimmed === "event: end" || eventType === "end") break;
+    }
+
+    // Deduplicate
+    const seen = new Set<string>();
+    return articles.filter(a => {
+      const key = a.title.toLowerCase().slice(0, 60);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  } catch (e) {
+    console.error("Firehose error:", e);
+    return [];
+  }
+}
+
 async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
   try {
     // Shopify's blog covers cross-border commerce, global selling, and e-commerce trends
@@ -328,19 +406,21 @@ Deno.serve(async (req) => {
     if (!NEWSDATA_KEY) throw new Error("NEWSDATA_API_KEY not configured");
     const PERPLEXITY_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_KEY) throw new Error("PERPLEXITY_API_KEY not configured");
+    const FIREHOSE_TOKEN = Deno.env.get("FIREHOSE_TAP_TOKEN");
 
     // Fetch all sources in parallel
-    const [newsDataArticles, googleNewsArticles, youtubeArticles, shopifyArticles, perplexity] = await Promise.all([
+    const [newsDataArticles, googleNewsArticles, youtubeArticles, shopifyArticles, firehoseArticles, perplexity] = await Promise.all([
       fetchNewsData(NEWSDATA_KEY),
       fetchGoogleNewsRSS(),
       fetchYouTubeRSS(),
       fetchShopifyBlogRSS(),
+      FIREHOSE_TOKEN ? fetchFirehose(FIREHOSE_TOKEN) : Promise.resolve([]),
       fetchPerplexityAnalysis(PERPLEXITY_KEY),
     ]);
 
     // Combine all articles
-    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles, ...shopifyArticles];
-    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length}), Shopify(${shopifyArticles.length})`);
+    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles, ...shopifyArticles, ...firehoseArticles];
+    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length}), Shopify(${shopifyArticles.length}), Firehose(${firehoseArticles.length})`);
 
     const total = articles.length;
     const posCount = articles.filter(a => a.sentiment === "positive").length;
@@ -361,6 +441,7 @@ Deno.serve(async (req) => {
       googleNews: googleNewsArticles.length,
       youtube: youtubeArticles.length,
       shopify: shopifyArticles.length,
+      firehose: firehoseArticles.length,
     };
 
     // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Disruption + AI Entrepreneurial Buzz + Keyword Bonus
