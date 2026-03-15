@@ -406,19 +406,21 @@ Deno.serve(async (req) => {
     if (!NEWSDATA_KEY) throw new Error("NEWSDATA_API_KEY not configured");
     const PERPLEXITY_KEY = Deno.env.get("PERPLEXITY_API_KEY");
     if (!PERPLEXITY_KEY) throw new Error("PERPLEXITY_API_KEY not configured");
+    const FIREHOSE_TOKEN = Deno.env.get("FIREHOSE_TAP_TOKEN");
 
     // Fetch all sources in parallel
-    const [newsDataArticles, googleNewsArticles, youtubeArticles, shopifyArticles, perplexity] = await Promise.all([
+    const [newsDataArticles, googleNewsArticles, youtubeArticles, shopifyArticles, firehoseArticles, perplexity] = await Promise.all([
       fetchNewsData(NEWSDATA_KEY),
       fetchGoogleNewsRSS(),
       fetchYouTubeRSS(),
       fetchShopifyBlogRSS(),
+      FIREHOSE_TOKEN ? fetchFirehose(FIREHOSE_TOKEN) : Promise.resolve([]),
       fetchPerplexityAnalysis(PERPLEXITY_KEY),
     ]);
 
     // Combine all articles
-    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles, ...shopifyArticles];
-    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length}), Shopify(${shopifyArticles.length})`);
+    const articles = [...newsDataArticles, ...googleNewsArticles, ...youtubeArticles, ...shopifyArticles, ...firehoseArticles];
+    console.log(`Sources: NewsData(${newsDataArticles.length}), Google News(${googleNewsArticles.length}), YouTube(${youtubeArticles.length}), Shopify(${shopifyArticles.length}), Firehose(${firehoseArticles.length})`);
 
     const total = articles.length;
     const posCount = articles.filter(a => a.sentiment === "positive").length;
