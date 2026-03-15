@@ -16,6 +16,9 @@ const QUERY = '"cross-border e-commerce" OR Temu OR Shein OR "global commerce" O
 const POS_WORDS = ["growth", "surge", "boom", "success", "record", "expand", "profit", "gain", "opportunity", "thrive", "innovation", "partnership", "expansion", "launch", "adoption", "integration", "QRIS", "digital payment", "marketplace", "free trade", "agreement", "opening", "invest", "revenue", "milestone"];
 const NEG_WORDS = ["tariff", "ban", "crash", "decline", "loss", "tension", "risk", "war", "sanction", "crackdown", "fine", "penalty", "slowdown", "restriction", "compliance", "de minimis", "customs duty", "trade barrier", "shutdown", "fraud", "counterfeit", "lawsuit", "probe", "investigation", "sustainability", "green deal", "carbon tax", "carbon border", "CBAM", "greenwashing", "ESG", "eco-regulation", "circular economy", "green compliance", "carbon footprint", "digital service tax", "DST", "location fee", "advertising levy", "ad tax", "advertising tax", "levy", "Hormuz", "strait closure", "oil crisis", "oil price", "shipping disruption", "fuel cost", "transport cost", "supply chain disruption", "Red Sea", "Houthi", "shipping route", "freight cost", "oil shock", "energy crisis", "pipeline", "blockade"];
 
+// Entrepreneurial / opportunity-positive keywords — boost Opportunity Radar when detected
+const OPP_WORDS = ["startup", "new business", "business idea", "side hustle", "entrepreneur", "founding", "co-founder", "bootstrapped", "venture", "incubator", "accelerator", "market entry", "first-mover", "untapped market", "emerging market", "niche", "pivot", "dropshipping", "private label", "white label", "reseller", "arbitrage", "sourcing", "supplier", "fulfillment", "3PL", "DTC", "direct-to-consumer", "brand launch", "product launch", "go-to-market", "MVP", "beta launch", "crowdfunding", "Kickstarter", "new seller", "seller registration", "onboarding", "new platform", "market gap", "disruption opportunity", "blue ocean"];
+
 interface ArticleResult {
   title: string;
   description: string;
@@ -255,7 +258,7 @@ async function fetchShopifyBlogRSS(): Promise<ArticleResult[]> {
   }
 }
 
-async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[]; opportunityAdjustment: number }> {
+async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: string; sentimentScore: number; keyInsights: string[]; opportunityAdjustment: number; entrepreneurialBuzz: number }> {
   try {
     const res = await fetch("https://api.perplexity.ai/chat/completions", {
       method: "POST",
@@ -264,13 +267,13 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         model: "sonar",
         messages: [
           { role: "system", content: "You are a cross-border e-commerce sentiment analyst. Respond ONLY with valid JSON, no markdown." },
-          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"], "opportunityAdjustment": 0-20 (score how much current disruptions create business opportunities for cross-border sellers, e.g. emerging markets opening, innovation gaps, new payment rails like QRIS, platform shifts — 0=no special opportunity, 20=major opportunity window)}` }
+          { role: "user", content: `Analyze the current sentiment around cross-border e-commerce, global retail, Temu, Shein, Alibaba, Rakuten, Shopee, EU tariffs, and international trade. Return JSON: {"summary": "2-3 sentence mood summary", "sentimentScore": 0-100 (0=very negative, 50=neutral, 100=very positive), "keyInsights": ["insight1", "insight2", "insight3"], "opportunityAdjustment": 0-20 (score how much current disruptions create business opportunities for cross-border sellers, e.g. emerging markets opening, innovation gaps, new payment rails like QRIS, platform shifts — 0=no special opportunity, 20=major opportunity window), "entrepreneurialBuzz": 0-20 (score how much people are currently talking about starting new cross-border businesses, new seller registrations, new brand launches, dropshipping/private label ideas, side hustles in global e-commerce, market entry plans — 0=no buzz, 20=massive entrepreneurial energy)}` }
         ],
         temperature: 0.1,
-        max_tokens: 500,
+        max_tokens: 600,
       }),
     });
-    if (!res.ok) { console.error("Perplexity error:", res.status); return { summary: "", sentimentScore: 50, keyInsights: [] }; }
+    if (!res.ok) { console.error("Perplexity error:", res.status); return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10, entrepreneurialBuzz: 10 }; }
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content || "{}";
     const jsonMatch = content.match(/\{[\s\S]*\}/);
@@ -281,12 +284,13 @@ async function fetchPerplexityAnalysis(apiKey: string): Promise<{ summary: strin
         sentimentScore: typeof parsed.sentimentScore === "number" ? parsed.sentimentScore : 50,
         keyInsights: Array.isArray(parsed.keyInsights) ? parsed.keyInsights : [],
         opportunityAdjustment: typeof parsed.opportunityAdjustment === "number" ? Math.min(20, Math.max(0, parsed.opportunityAdjustment)) : 10,
+        entrepreneurialBuzz: typeof parsed.entrepreneurialBuzz === "number" ? Math.min(20, Math.max(0, parsed.entrepreneurialBuzz)) : 10,
       };
     }
-    return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
+    return { summary: content, sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10, entrepreneurialBuzz: 10 };
   } catch (e) {
     console.error("Perplexity error:", e);
-    return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10 };
+    return { summary: "", sentimentScore: 50, keyInsights: [], opportunityAdjustment: 10, entrepreneurialBuzz: 10 };
   }
 }
 
@@ -359,11 +363,19 @@ Deno.serve(async (req) => {
       shopify: shopifyArticles.length,
     };
 
-    // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Adjustment (0-20)
+    // Opportunity Score: (Negative% * 1.5) + (Neutral% * 0.5) + AI Disruption + AI Entrepreneurial Buzz + Keyword Bonus
     const negPercent = total > 0 ? Math.round((negCount / total) * 100) : 0;
     const neuPercent = total > 0 ? Math.round((neuCount / total) * 100) : 0;
     const posPercent = total > 0 ? Math.round((posCount / total) * 100) : 0;
-    const rawOpportunity = (negPercent * 1.5) + (neuPercent * 0.5) + perplexity.opportunityAdjustment;
+
+    // Count entrepreneurial/opportunity keywords across all articles
+    const oppKeywordHits = articles.reduce((sum, a) => {
+      const text = `${a.title} ${a.description}`.toLowerCase();
+      return sum + OPP_WORDS.filter(w => text.includes(w.toLowerCase())).length;
+    }, 0);
+    const oppKeywordBonus = Math.min(15, Math.round(oppKeywordHits * 0.5));
+
+    const rawOpportunity = (negPercent * 1.5) + (neuPercent * 0.5) + perplexity.opportunityAdjustment + perplexity.entrepreneurialBuzz + oppKeywordBonus;
     const opportunityScore = Math.round(Math.max(0, Math.min(100, rawOpportunity)));
 
     let opportunityLabel: string;
@@ -383,6 +395,8 @@ Deno.serve(async (req) => {
       opportunityScore,
       opportunityLabel,
       opportunityAiAdjustment: perplexity.opportunityAdjustment,
+      entrepreneurialBuzz: perplexity.entrepreneurialBuzz,
+      oppKeywordBonus,
       breakdown: {
         positive: posCount, negative: negCount, neutral: neuCount, total,
         positivePercent: posPercent,
